@@ -1,34 +1,40 @@
-f = open("C:/Users/crabb/OneDrive/Documents/VSC/AdventOfCode/inputday2.txt", "r")
-f_read = f.read()
+from copy import copy
+
+with open("C:/Users/crabb/OneDrive/Documents/VSC/AdventOfCode/inputday2.txt", "r") as f:
+    f_read = f.read()
+
 intcode = f_read.split(",")
-#fuel.pop()
 intcode= [int(i) for i in intcode]
-f.close()
 print(intcode)
 
-def Intcode(code):
-    code[1], code[2] = 12, 2
-    print(code)
-    run = True
-    i = 0
-    while run is True:
-        a = code[0 + 4 * i]
-        print(a)
-        if a == 1:
-            b, c, d = code[1 + 4 * i], code[2 + 4 * i], code[3 + 4 * i]
-            code[d] = (code[b] + code[c])
-            i += 1
-            continue
-        if a == 2:
-            b, c, d = code[1 + 4 * i], code[2 + 4 * i], code[3 + 4 * i]
-            code[d] = (code[b] * code[c])
-            i += 1
-            continue
-        if a == 99:
-            run = False
+def Intcode(code, input1, input2):
+    code[1], code[2] = input1, input2
+    # run = True
+    # i = 0
+    # while run is True:
+    for i in range(int(len(code)/4)):
+        opcode = code[0 + 4 * i]
+        parameter1, parameter2, parameter3 = code[1 + 4 * i], code[2 + 4 * i], code[3 + 4 * i]
+        if opcode == 1:
+            code[parameter3] = (code[parameter1] + code[parameter2])
+            # i += 1
+        elif opcode == 2:
+            code[parameter3] = (code[parameter1] * code[parameter2])
+            # i += 1
+        elif opcode == 99:
+            break
         else:
-            print("Found an unknown opcode", code[a])
-            run = False
-    print(code)
+            print("Found an unknown opcode", code[opcode])
+            break
+    return code
 
-Intcode(intcode)
+
+def FindIntput(code):
+    for input1 in range(100):
+        for input2 in range(100):
+            if Intcode(copy(code), input1, input2)[0] == 19690720:
+                return input1, input2
+           
+i1, i2 = FindIntput(intcode)
+print(100*i1 + i2)
+#19690720
