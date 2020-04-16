@@ -95,7 +95,6 @@ def does_intersect(vert_wire_1, horiz_wire_1, vert_wire_2, horiz_wire_2):
     
     h_x1, h_y1 = horiz_wire_1
     h_x2, h_y2 = horiz_wire_2
-ayyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy lmao
     if v_y1 <= h_y1 <= vy2 or v_y1 <= h_y2 <= vy2:
         if v_y1 <= h_y1 <= vy2 or v_y1 <= h_y2 <= vy2:
             pass
