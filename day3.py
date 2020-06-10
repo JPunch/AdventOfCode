@@ -55,38 +55,40 @@ import re
 def wire_coordinates(wire): #Example input L12 "wire goes left by 12"
     currentpos = [0,0]
     coordinatelist = []
-
-#    print(direction, magnitude)
     for instruction in wire:
         direction = re.sub('[0-9]','', instruction)
         magnitude = int(re.sub('[a-zA-Z]', "", instruction))
         if direction == "L":
             currentpos[0] -= magnitude
-            coordinatelist.append(currentpos)
+            coordinatelist.append(currentpos[:])
         elif direction == "R":
             currentpos[0] += magnitude
-            coordinatelist.append(currentpos)
+            coordinatelist.append(currentpos[:])
         elif direction == "U":
             currentpos[1] += magnitude
-            coordinatelist.append(currentpos)
+            coordinatelist.append(currentpos[:])
         elif direction == "D":
             currentpos[1] -= magnitude
-            coordinatelist.append(currentpos)
+            coordinatelist.append(currentpos[:])
         else:
             print("There is an incorrect direction")
-    # print(coordinatelist)
     return coordinatelist
 
+def ccw(A,B,C):
+    return (C[1]-A[1]) * (B[0]-A[0]) > (B[1]-A[1]) * (C[0]-A[0])
 
-def intersection(wire1, wire2):
-    list_intersections = []
-    for coordinates1 in wire1:
-        for coordinates2 in wire2:
-            x = coordinates1[0] - coordinates2[0]
-            y = coordinates1[1] - coordinates2[1]
-            if x + y == 0:
-                list_intersections.append((coordinates1))
-    return list_intersections
+def intersect(A, B, C, D):
+    return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
+
+def check_intersect(w1co, w2co):
+    intersections = []
+    for pos1 in range(len(w1co) - 1):
+        for pos2 in range(len(w2co) - 1):
+            if intersect(w1co[pos1], w1co[pos1 + 1], w2co[pos2], w1co[pos2 + 1]) == True:
+                intersections.append([w1co[pos1], w1co[pos1 + 1], w2co[pos2], w1co[pos2 + 1]])
+            else:
+                continue
+    return intersections
 
 
 def does_intersect(vert_wire_1, horiz_wire_1, vert_wire_2, horiz_wire_2):
@@ -114,9 +116,8 @@ if __name__ == "__main__":
         f_read.pop()
     w1 = f_read[0].split(",")
     w2 = f_read[1].split(",")
-
     w1co = wire_coordinates(w1)
     w2co = wire_coordinates(w2)
+    print(check_intersect(w1co, w2co))
 
-    intersection(w1co, w2co)
     #closest_intersection(intersection(wire_coordinates(w1), wire_coordinates(w2)))
