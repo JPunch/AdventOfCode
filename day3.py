@@ -48,7 +48,7 @@ import re
 # plt.ylabel('y', color='#1C2833')
 # plt.legend(loc='upper left')
 # plt.grid()
-#  plt.show()
+# plt.show()
 # plt.savefig('wires.png')
 
 
@@ -59,65 +59,57 @@ def wire_coordinates(wire): #Example input L12 "wire goes left by 12"
         direction = re.sub('[0-9]','', instruction)
         magnitude = int(re.sub('[a-zA-Z]', "", instruction))
         if direction == "L":
-            currentpos[0] -= magnitude
-            coordinatelist.append(currentpos[:])
+            for _ in range(magnitude):
+                currentpos[0] -= 1
+                coordinatelist.append(currentpos[:])
         elif direction == "R":
-            currentpos[0] += magnitude
-            coordinatelist.append(currentpos[:])
+            for _ in range(magnitude):
+                currentpos[0] += 1
+                coordinatelist.append(currentpos[:])
+            # currentpos[0] += magnitude
+            # coordinatelist.append(currentpos[:])
         elif direction == "U":
-            currentpos[1] += magnitude
-            coordinatelist.append(currentpos[:])
+            for _ in range(magnitude):
+                currentpos[1] += 1
+                coordinatelist.append(currentpos[:])
+            # currentpos[1] += magnitude
+            # coordinatelist.append(currentpos[:])
         elif direction == "D":
-            currentpos[1] -= magnitude
-            coordinatelist.append(currentpos[:])
+            for _ in range(magnitude):
+                currentpos[1] -= 1
+                coordinatelist.append(currentpos[:])
+            # currentpos[1] -= magnitude
+            # coordinatelist.append(currentpos[:])
         else:
             print("There is an incorrect direction")
     return coordinatelist
 
-def ccw(A,B,C):
-    return (C[1]-A[1]) * (B[0]-A[0]) > (B[1]-A[1]) * (C[0]-A[0])
+def closest_intersection(w1co, w2co):
+    intersection = [i for i in w1co if i in w2co]
+    ans = min([abs(x) + abs(y) for (x, y) in intersection])
+    return ans
 
-def intersect(A, B, C, D):
-    return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
-
-def check_intersect(w1co, w2co):
-    intersections = []
-    for pos1 in range(len(w1co) - 1):
-        for pos2 in range(len(w2co) - 1):
-            if intersect(w1co[pos1], w1co[pos1 + 1], w2co[pos2], w1co[pos2 + 1]) == True:
-                intersections.append([w1co[pos1], w1co[pos1 + 1], w2co[pos2], w1co[pos2 + 1]])
-            else:
-                continue
-    return intersections
-
-
-def does_intersect(vert_wire_1, horiz_wire_1, vert_wire_2, horiz_wire_2):
-    v_x1, v_y1 = vert_wire_1
-    v_x2, v_y2 = vert_wire_2
-    
-    h_x1, h_y1 = horiz_wire_1
-    h_x2, h_y2 = horiz_wire_2
-    if v_y1 <= h_y1 <= vy2 or v_y1 <= h_y2 <= vy2:
-        if v_y1 <= h_y1 <= vy2 or v_y1 <= h_y2 <= vy2:
-            pass
-
-def closest_intersection(list_intersections):
-    manhattan_distances = []
-    def manhattan_distance(Coordinates):
-        return Coordinates[0] + Coordinates[1]
-    for intersections in list_intersections:
-        manhattan_distances.append(manhattan_distance(intersections))
-    print(manhattan_distances.sort())
+def make_set(wire):
+    wire_set = set()
+    for i in wire:
+        x = i[0]
+        y = i[1]
+        wire_set.add((x, y))
+    return wire_set
 
 
 if __name__ == "__main__":
-    with open("C:/Users/crabb/OneDrive/Documents/VSC/AdventOfCode/inputday3.txt", "r") as f:
+    # with open("C:/Users/crabb/OneDrive/Documents/VSC/AdventOfCode/inputday3.txt", "r") as f:
+    with open ("inputday3.txt", "r") as f:
         f_read = f.read().split("\n")
         f_read.pop()
     w1 = f_read[0].split(",")
     w2 = f_read[1].split(",")
+    # w1 = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51".split(",")
+    # w2 = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7".split(",")
     w1co = wire_coordinates(w1)
     w2co = wire_coordinates(w2)
-    print(check_intersect(w1co, w2co))
-
-    #closest_intersection(intersection(wire_coordinates(w1), wire_coordinates(w2)))
+    w1co = make_set(w1co)
+    w2co = make_set(w2co)
+    print(w1co&w2co)
+    print(closest_intersection(w1co, w2co))
