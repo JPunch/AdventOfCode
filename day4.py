@@ -26,6 +26,7 @@ def count_password(passrange):
 
 def extra_password(password):
     password = [int(i) for i in str(password)]
+    letter_count = {}
     if is_password(password) == True:
         for index in range(len(password) - 1):
             if password[index] == password[index+1] 
