@@ -97,6 +97,23 @@ def make_set(wire):
         wire_set.add((x, y))
     return wire_set
 
+def shortest_wire(intersections, w1co, w2co):
+    answ1 = []
+    answ2 = []
+    w1 = enumerate(w1co)
+    w2 = enumerate(w2co)
+    for x, y in intersections:
+        ls_xy = [x, y]
+        if ls_xy in w1co:
+            answ1.append(w1co.index(ls_xy) + 1)
+            # print(w1co.index(ls_xy))
+        if ls_xy in w2co:
+            answ2.append(w2co.index(ls_xy) + 1)
+            # print(w2co.index(ls_xy))
+    ans = min(x + y for x, y in zip(answ1, answ2))
+    return ans
+    
+
 
 if __name__ == "__main__":
     # with open("C:/Users/crabb/OneDrive/Documents/VSC/AdventOfCode/inputday3.txt", "r") as f:
@@ -105,11 +122,11 @@ if __name__ == "__main__":
         f_read.pop()
     w1 = f_read[0].split(",")
     w2 = f_read[1].split(",")
-    # w1 = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51".split(",")
-    # w2 = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7".split(",")
+    # w1 = "R75,D30,R83,U83,L12,D49,R71,U7,L72".split(",")
+    # w2 = "U62,R66,U55,R34,D71,R55,D58,R83".split(",")
     w1co = wire_coordinates(w1)
     w2co = wire_coordinates(w2)
-    w1co = make_set(w1co)
-    w2co = make_set(w2co)
-    print(w1co&w2co)
-    print(closest_intersection(w1co, w2co))
+    w1coset = make_set(w1co)
+    w2coset = make_set(w2co)
+    intersection = w1coset&w2coset
+    print(shortest_wire(intersection, w1co, w2co))
