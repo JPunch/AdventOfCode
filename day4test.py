@@ -2,6 +2,7 @@
 
 import unittest
 from day4 import is_password
+from day4 import extra_password
 
 
 example1 = 111111
@@ -20,13 +21,13 @@ class IsPasswordTests(unittest.TestCase):
         return self.assertEqual(is_password(example3), False)
 
 
-class IsPasswordTests(unittest.TestCase):
+class ExtraPasswordTests(unittest.TestCase):
     def test_ex1(self):
-        return self.assertEqual(is_password(example1), True)
+        return self.assertEqual(extra_password(example4), True)
     def test_ex2(self):
-        return self.assertEqual(is_password(example2), False)
+        return self.assertEqual(extra_password(example5), False)
     def test_ex3(self):
-        return self.assertEqual(is_password(example3), False)
+        return self.assertEqual(extra_password(example6), True)
 
 
 if __name__ == "__main__":
