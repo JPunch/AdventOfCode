@@ -4,7 +4,6 @@ import math
 with open("C:/Users/crabb/OneDrive/Documents/VSC/AdventOfCode/inputday1.txt", "r")as f:
     f_read = f.read()
     fuel = f_read.split("\n")
-    fuel.pop()
     fuel = [int(i) for i in fuel]
     f.close()
 
