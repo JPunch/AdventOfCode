@@ -1,7 +1,9 @@
-'''Advent of code 2019 day10'''
+'''Advent of code 2019 day10 This one got me and the solution here really helped me to understand
+some extra functions from dictionaries that I didn't know https://github.com/Randdalf/aoc19/blob/master/d10.py'''
 
 import numpy as np
 import math
+from collections import defaultdict
 
 with open("inputday10.txt", "r") as f:
     f_read = f.read().split("\n")
@@ -9,12 +11,12 @@ with open("inputday10.txt", "r") as f:
 
 class Point():
     def __init__(self,x ,y):
-        self.x = x
-        self.y = y
+        self.x = int(x)
+        self.y = int(y)
 
 
 def station_location(field): 
-    asteroid_field = field.copy()
+    asteroid_field = field #field.copy()
     asteroid_points = []
     location_count = {}
     angles = []
@@ -39,41 +41,43 @@ def station_location(field):
     for a in location_count:
         if location_count[a] == ans:
             location = a
+    print(location)
     return ans, location, asteroid_points
 
 def asteroid_bet(field):
-    total, location, asteroid_points = station_location(field) #Location = 20,18
+    _, location, asteroid_points = station_location(field) #Location = 20,18
     location = Point(int(location.split(",")[0]), int(location.split(",")[1]))
-    #so use ans to take away current amount of asteroids in sight then remove them and rerun until200th asteroid in sight and then sort to find it
+    angles = defaultdict(list)
 
+    for asteroid in asteroid_points:
+        angles[angle(location, asteroid)].append(asteroid)
 
+    world = list(angles.items())
+    world.sort(key = lambda x: x[0])
 
+    for _, asteroids in world:
+        asteroids.sort(key = lambda x: distance(location, x))
+    
+    start = np.pi / 2
+    index = 0
+    while world[index][0] < start:
+        index += 1
+    
+    dust = []
+    while len(dust) < 200:
+        asteroids = world[index][1]
+        if len(asteroids) > 0:
+            dust.append(asteroids.pop())
+        index = (index + 1) % len(world)
+    hecking_200th_asteroid = dust[-1]
+    return (hecking_200th_asteroid.x * 100) + (hecking_200th_asteroid.y)
+    
+def distance(location, asteroid):
+    return ((location.x - asteroid.x)**2 + (location.y - asteroid.y)**2)**0.5
 
-
-
-
-
-
-    # angle = []
-    # distances = []
-    # locations = []
-    # angle_distance = []
-    # for j in asteroid_points:
-    #     if location == j:
-    #         continue
-    #     else:
-    #         angle.append([(180/np.pi)*np.arctan2((location.y - j.y),(location.x - j.x))])
-    #         locations.append([j.x, j.y])
-    #         distances.append([math.sqrt((location.x - j.x)**2 + (location.y - j.y)**2)])
-    # for i in range(len(angle)):# I don't endorse the existence of this for loop or perhaps most of my for loops
-    #     angle_distance.append((angle[i], distances[i])) 
-    # # angle_distances = zip(angle, location) help me
-    # angle_distance.sort(key = lambda x: x[1])
-    # del angle_distance[0]
-    # return angle_distance
-
-
-#Idea a dictionary filled with angles and then distance from laser location(sorted)from first to last hit then loop through removing one from each angle in turn if dictionary is empty it is removed
+def angle(location, asteroid):
+    angle = np.arctan2((location.y - asteroid.y),(location.x - asteroid.x))
+    return angle
 
 if __name__ == "__main__":
     # print(station_location(f_read)[:2])

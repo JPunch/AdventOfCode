@@ -21,7 +21,7 @@ class StationLocationTests(unittest.TestCase):
 
 class AsteroidBetTests(unittest.TestCase):
     def test_ex1(self):
-        return self.assertEqual(asteroid_bet(example4), 802)
+        return self.assertEqual(asteroid_bet(example4.split("/")), 802)
 
 
 if __name__ == "__main__":
