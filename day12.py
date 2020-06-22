@@ -84,6 +84,8 @@ def moon_energy(moons, step_num):
     ans = [(abs(i.posx) + abs(i.posy) + abs(i.posz)) * (abs(i.vecx) + abs(i.vecy) + abs(i.vecz)) for i in moons]
     return sum(ans)
 
+#sum of each moons x components is the same i.e all x = const all y = const etc... and all vectors sum to 0
+
 def match_state(moons):
     initial_state = [moons]
     final_state = []

@@ -22,6 +22,10 @@ def opcode_factory(opcode):
         return AddOp()
     elif opcode == 2:
         return MultOp()
+    elif opcode ==3:
+        return InputOp()
+    elif opcode ==4:
+        return OutputOp()
     elif opcode == 99:
         return None
     else:
@@ -59,6 +63,27 @@ class MultOp(Operation):
         memory.set_mem(save_at, ans)
 
 
+class InputOp(Operation):
+    def __init__(self):
+        self.code = 3
+        super(InputOp, self).__init__(1)
+        
+    def run_operation(self, memory):
+        save_at = self.get_args(memory)
+        ans = input("Enter the intcode input")
+        memory.set_mem(save_at, ans)
+
+
+class OutputOp(Operation):
+    def __init__(self):
+        self.code = 4
+        super(OutputOp, self).__init__(1)
+
+    def run_operation(self, memory):
+        ans = self.get_args(memory)
+        print(ans)
+
+
 class Memory:
     def __init__(self, memory):
         self.memory = parse_string(memory)
@@ -88,6 +113,7 @@ class Memory:
         except:
             raise RuntimeError(f"Memory location {location} out of bounds")
 
+
 def d2p1():
     with open('inputday2.txt', 'r') as in_file:
         program = in_file.read()
@@ -109,6 +135,8 @@ def d2p2():
             if ans == 19690720:
                 return (100*i + j)
 
+def d5p1():
+    pass
 
 if __name__ == "__main__":
     print(d2p2())
