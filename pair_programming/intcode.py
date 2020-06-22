@@ -31,12 +31,14 @@ def opcode_factory(opcode):
     else:
         raise RuntimeError("Unspecified command")
 
+
 class Operation:
     def __init__(self, n_args):
         self.n_args = n_args
 
     def get_args(self, memory):
         return memory.get_count_after_pc(self.n_args)
+
 
 class AddOp(Operation):
     def __init__(self):
@@ -49,6 +51,7 @@ class AddOp(Operation):
         val2 = memory.get_value(ref2)
         ans = val1+val2
         memory.set_mem(save_at, ans)
+
 
 class MultOp(Operation):
     def __init__(self):
