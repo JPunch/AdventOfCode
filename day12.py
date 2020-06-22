@@ -85,6 +85,10 @@ def moon_energy(moons, step_num):
     ans = [(abs(i.posx) + abs(i.posy) + abs(i.posz)) * (abs(i.vecx) + abs(i.vecy) + abs(i.vecz)) for i in moons]
     return sum(ans)
 
+def 
+#for it to repeat any point it'll have to come from the starting position repeated and then the whole sequence will repeat again
+
+
 
 if __name__ == "__main__":
     with open("inputday12.txt", "r") as f:

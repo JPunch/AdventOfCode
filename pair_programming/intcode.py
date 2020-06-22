@@ -22,10 +22,15 @@ def opcode_factory(opcode):
         return AddOp()
     elif opcode == 2:
         return MultOp()
+    elif opcode == 3:
+        pass
+    elif opcode == 4:
+        pass
     elif opcode == 99:
         return None
     else:
         raise RuntimeError("Unspecified command")
+
 
 class Operation:
     def __init__(self, n_args):
@@ -33,6 +38,7 @@ class Operation:
 
     def get_args(self, memory):
         return memory.get_count_after_pc(self.n_args)
+
 
 class AddOp(Operation):
     def __init__(self):
@@ -46,6 +52,7 @@ class AddOp(Operation):
         ans = val1+val2
         memory.set_mem(save_at, ans)
 
+
 class MultOp(Operation):
     def __init__(self):
         self.code = 2
@@ -58,6 +65,11 @@ class MultOp(Operation):
         ans = val1*val2
         memory.set_mem(save_at, ans)
 
+
+class InputOp(Operation):
+    def __init__(self):
+        self.code = 3
+        super(InputOp, self).__init__(3)
 
 class Memory:
     def __init__(self, memory):
@@ -87,6 +99,7 @@ class Memory:
             return self.memory[location]
         except:
             raise RuntimeError(f"Memory location {location} out of bounds")
+
 
 def d2p1():
     with open('inputday2.txt', 'r') as in_file:
