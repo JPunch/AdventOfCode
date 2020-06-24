@@ -1,7 +1,9 @@
+from enum import Enum
+
 def compute(mem):
     while True:
         opcode = mem.next_command()
-
+        opcode = OpCode(opcode)
         # Create opcode handling object
         operation = opcode_factory(opcode)
 
@@ -18,32 +20,55 @@ def parse_string(mem_string):
     return [int(num) for num in mem_string.strip().split(",")]
 
 def opcode_factory(opcode):
-    if opcode == 1:
-        return AddOp()
-    elif opcode == 2:
-        return MultOp()
-    elif opcode ==3:
-        return InputOp()
-    elif opcode ==4:
-        return OutputOp()
-    elif opcode == 99:
+    if opcode.opcode == 1:
+        return AddOp(opcode)
+    elif opcode.opcode == 2:
+        return MultOp(opcode)
+    elif opcode.opcode == 3:
+        return InputOp(opcode)
+    elif opcode.opcode == 4:
+        return OutputOp(opcode)
+    elif opcode.opcode == 99:
         return None
     else:
-        raise RuntimeError("Unspecified command")
+        raise RuntimeError(f"Unspecified command: {opcode.opcode()}")
 
 
 class Operation:
-    def __init__(self, n_args):
+    def __init__(self, n_args, opcode):
         self.n_args = n_args
+        self.opcode = opcode
+
+    def parse_arg(self, memory, param, value):
+        if param == ParameterMode.POSITION:
+            return memory.get_value(value)
+        elif param == ParameterMode.IMMEDIATE:
+            return value
+        elif param == ParameterMode.RELATIVE:
+            raise RuntimeError("Unimplemented")
 
     def get_args(self, memory):
-        return memory.get_count_after_pc(self.n_args)
+        p_data = memory.get_count_after_pc(self.n_args)
+        p_modes  = [self.opcode.p1, self.opcode.p2, self.opcode.p3]
+
+        return [
+           self.parse_arg(memory, mode, val) 
+           for val, mode in zip(p_data, p_modes[:self.n_args])
+        ]
+
+    # def parse_arg(self, memory, param, value):
+    #     if param == ParameterMode.POSITION:
+    #         return memory.get_value(value)
+    #     elif param == ParameterMode.IMMEDIATE:
+    #         return value
+    #     elif param == ParameterMode.RELATIVE:
+    #         raise RuntimeError("Unimplemented")
 
 
 class AddOp(Operation):
-    def __init__(self):
+    def __init__(self, opcode):
         self.code = 1
-        super(AddOp, self).__init__(3)
+        super(AddOp, self).__init__(3, opcode)
         
     def run_operation(self, memory):
         ref1, ref2, save_at = self.get_args(memory)
@@ -54,9 +79,9 @@ class AddOp(Operation):
 
 
 class MultOp(Operation):
-    def __init__(self):
+    def __init__(self, opcode):
         self.code = 2
-        super(MultOp, self).__init__(3)
+        super(MultOp, self).__init__(3, opcode)
         
     def run_operation(self, memory):
         ref1, ref2, save_at = self.get_args(memory)
@@ -67,20 +92,20 @@ class MultOp(Operation):
 
 
 class InputOp(Operation):
-    def __init__(self):
+    def __init__(self, opcode):
         self.code = 3
-        super(InputOp, self).__init__(1)
+        super(InputOp, self).__init__(1, opcode)
         
     def run_operation(self, memory):
         save_at = self.get_args(memory)
-        ans = input("Enter the intcode input")
+        ans = input("Enter the intcode input: ")
         memory.set_mem(save_at, ans)
 
 
 class OutputOp(Operation):
-    def __init__(self):
+    def __init__(self, opcode):
         self.code = 4
-        super(OutputOp, self).__init__(1)
+        super(OutputOp, self).__init__(1, opcode)
 
     def run_operation(self, memory):
         ans = self.get_args(memory)
@@ -110,12 +135,23 @@ class Memory:
         except:
             raise RuntimeError(f"Memory location {location} out of bounds")
 
-    def get_value(self, location):
+    def get_value(self, location): #take an input saying which mode it's in then get the value accrodingly
         try:
             return self.memory[location]
         except:
             raise RuntimeError(f"Memory location {location} out of bounds")
 
+class ParameterMode(Enum):
+    POSITION = 0
+    IMMEDIATE = 1
+    RELATIVE = 2
+
+class OpCode:
+    def __init__(self, opcode_int): # 01101
+        self.opcode = opcode_int % 100
+        self.p1 = ParameterMode(opcode_int // 100 % 10 % 10)
+        self.p2 = ParameterMode(opcode_int // 1000 % 10)
+        self.p3 = ParameterMode(opcode_int // 10000)
 
 def d2p1():
     with open('inputday2.txt', 'r') as in_file:
@@ -139,7 +175,12 @@ def d2p2():
                 return (100*i + j)
 
 def d5p1():
-    pass
+    with open('pair_programming\inputday5.txt', 'r') as in_file:
+        program = in_file.read()
+    mem = Memory(program)
+    output = compute(mem)
+    print(output[0])
 
 if __name__ == "__main__":
-    print(d2p2())
+    # print(d2p2())
+    print(d5p1())
