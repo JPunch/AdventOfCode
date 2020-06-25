@@ -47,14 +47,17 @@ class Operation:
         elif param == ParameterMode.RELATIVE:
             raise RuntimeError("Unimplemented")
 
-    def get_args(self, memory):
+    def get_args(self, memory, code):
         p_data = memory.get_count_after_pc(self.n_args)
         p_modes  = [self.opcode.p1, self.opcode.p2, self.opcode.p3]
 
-        return [
-           self.parse_arg(memory, mode, val) 
-           for val, mode in zip(p_data, p_modes[:self.n_args])
-        ]
+        if code == 3 or code == 4:
+            return p_data[0]
+        else:
+            return [
+            self.parse_arg(memory, mode, val) 
+            for val, mode in zip(p_data, p_modes[:self.n_args])
+            ]
 
     # def parse_arg(self, memory, param, value):
     #     if param == ParameterMode.POSITION:
@@ -71,7 +74,8 @@ class AddOp(Operation):
         super(AddOp, self).__init__(3, opcode)
         
     def run_operation(self, memory):
-        ref1, ref2, save_at = self.get_args(memory)
+        ref1, ref2, save_at = self.get_args(memory, self.code)
+        print(ref1, ref2, save_at)
         val1 = memory.get_value(ref1)
         val2 = memory.get_value(ref2)
         ans = val1+val2
@@ -84,7 +88,7 @@ class MultOp(Operation):
         super(MultOp, self).__init__(3, opcode)
         
     def run_operation(self, memory):
-        ref1, ref2, save_at = self.get_args(memory)
+        ref1, ref2, save_at = self.get_args(memory, self.code)
         val1 = memory.get_value(ref1)
         val2 = memory.get_value(ref2)
         ans = val1*val2
@@ -97,15 +101,15 @@ class InputOp(Operation):
         super(InputOp, self).__init__(1, opcode)
         
     def run_operation(self, memory):
-        save_at = self.get_args(memory)
-        ans = input("Enter the intcode input: ")
+        save_at = self.get_args(memory, self.code)
+        ans = int(input("Enter the intcode input: "))
         memory.set_mem(save_at, ans)
 
 
 class OutputOp(Operation):
     def __init__(self, opcode):
         self.code = 4
-        super(OutputOp, self).__init__(1, opcode)
+        super(OutputOp, self).__init__(1, opcode, self.code)
 
     def run_operation(self, memory):
         ans = self.get_args(memory)
@@ -175,11 +179,11 @@ def d2p2():
                 return (100*i + j)
 
 def d5p1():
-    with open('pair_programming\inputday5.txt', 'r') as in_file:
+    with open('pair_programming/inputday5.txt', 'r') as in_file:
         program = in_file.read()
     mem = Memory(program)
     output = compute(mem)
-    print(output[0])
+    return output
 
 if __name__ == "__main__":
     # print(d2p2())
