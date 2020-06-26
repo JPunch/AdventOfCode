@@ -54,10 +54,21 @@ class Operation:
         if code == 3 or code == 4:
             return p_data[0]
         else:
-            return [
+            args = [
             self.parse_arg(memory, mode, val) 
             for val, mode in zip(p_data, p_modes[:self.n_args])
             ]
+            if p_modes[-1].value == 0:
+                args.pop()
+                args.append(p_data[-1])
+                return args #appended last data point to save at said location
+            elif p_modes[-1].value == 1:
+                args.pop()
+                args.append(self.pc - 1) #as 1 is immediate appends position of argument
+                return args
+
+
+            
 
     # def parse_arg(self, memory, param, value):
     #     if param == ParameterMode.POSITION:
@@ -74,10 +85,8 @@ class AddOp(Operation):
         super(AddOp, self).__init__(3, opcode)
         
     def run_operation(self, memory):
-        ref1, ref2, save_at = self.get_args(memory, self.code)
-        print(ref1, ref2, save_at)
-        val1 = memory.get_value(ref1)
-        val2 = memory.get_value(ref2)
+        val1, val2, save_at = self.get_args(memory, self.code)
+        # print(val1, val2, save_at)
         ans = val1+val2
         memory.set_mem(save_at, ans)
 
@@ -88,9 +97,7 @@ class MultOp(Operation):
         super(MultOp, self).__init__(3, opcode)
         
     def run_operation(self, memory):
-        ref1, ref2, save_at = self.get_args(memory, self.code)
-        val1 = memory.get_value(ref1)
-        val2 = memory.get_value(ref2)
+        val1, val2, save_at = self.get_args(memory, self.code)
         ans = val1*val2
         memory.set_mem(save_at, ans)
 
@@ -102,17 +109,18 @@ class InputOp(Operation):
         
     def run_operation(self, memory):
         save_at = self.get_args(memory, self.code)
-        ans = int(input("Enter the intcode input: "))
+        # ans = int(input("Enter the intcode input: "))
+        ans = 1
         memory.set_mem(save_at, ans)
 
 
 class OutputOp(Operation):
     def __init__(self, opcode):
         self.code = 4
-        super(OutputOp, self).__init__(1, opcode, self.code)
+        super(OutputOp, self).__init__(1, opcode)
 
     def run_operation(self, memory):
-        ans = self.get_args(memory)
+        ans = self.get_args(memory, self.code)
         print(ans)
 
 
@@ -187,4 +195,4 @@ def d5p1():
 
 if __name__ == "__main__":
     # print(d2p2())
-    print(d5p1())
+    print(d5p1()[0])

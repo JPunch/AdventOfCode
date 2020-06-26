@@ -18,3 +18,12 @@ def test_instruction_decode(param_opcode, expected):
     assert opcode.p1 == expected["p1"]
     assert opcode.p2 == expected["p2"]
     assert opcode.p3 == expected["p3"]
+
+def test_addop():
+    pass
+def test_multop():
+    pass
+def test_inputop():
+    pass
+def test_outputop():
+    pass
