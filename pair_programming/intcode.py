@@ -64,7 +64,7 @@ class Operation:
                 return args #appended last data point to save at said location
             elif p_modes[-1].value == 1:
                 args.pop()
-                args.append(self.pc - 1) #as 1 is immediate appends position of argument
+                args.append(memory.pc - 1) #as 1 is immediate appends position of argument
                 return args
 
 
@@ -195,4 +195,4 @@ def d5p1():
 
 if __name__ == "__main__":
     # print(d2p2())
-    print(d5p1()[0])
+    d5p1()
