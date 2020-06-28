@@ -28,10 +28,18 @@ def opcode_factory(opcode):
         return InputOp(opcode)
     elif opcode.opcode == 4:
         return OutputOp(opcode)
+    elif opcode.opcode == 5:
+        return JumpIfTrueOp(opcode)
+    elif opcode.opcode == 6:
+        return JumpIfFalseOp(opcode)
+    elif opcode.opcode == 7:
+        return LessThanOp(opcode)
+    elif opcode.opcode == 8:
+        return EqualsOp(opcode)
     elif opcode.opcode == 99:
         return None
     else:
-        raise RuntimeError(f"Unspecified command: {opcode.opcode()}")
+        raise RuntimeError(f"Unspecified command: {opcode.opcode}")
 
 
 class Operation:
@@ -39,44 +47,33 @@ class Operation:
         self.n_args = n_args
         self.opcode = opcode
 
-    def parse_arg(self, memory, param, value):
+    def get_args(self, memory, code, increment_pc=True):
+        p_data = memory.get_count_after_pc(self.n_args, increment_pc)
+        p_modes  = [self.opcode.p1, self.opcode.p2, self.opcode.p3]
+
+        print(self.opcode.opcode, p_data)
+
+        args = [
+            self.parse_value_arg(memory, mode, val) 
+            for val, mode in zip(p_data[:-1], p_modes[:self.n_args-1])
+        ]
+        # Assume location to write to is always refering to a position
+        if self.opcode.opcode == 4:
+            args.append(self.parse_value_arg(memory, self.opcode.p1, p_data[-1]))
+        else:
+            args.append(self.parse_write_arg(memory, p_data[-1]))
+        return args
+
+    def parse_write_arg(self, memory, value):
+        return value
+
+    def parse_value_arg(self, memory, param, value):
         if param == ParameterMode.POSITION:
             return memory.get_value(value)
         elif param == ParameterMode.IMMEDIATE:
             return value
         elif param == ParameterMode.RELATIVE:
             raise RuntimeError("Unimplemented")
-
-    def get_args(self, memory, code):
-        p_data = memory.get_count_after_pc(self.n_args)
-        p_modes  = [self.opcode.p1, self.opcode.p2, self.opcode.p3]
-
-        if code == 3 or code == 4:
-            return p_data[0]
-        else:
-            args = [
-            self.parse_arg(memory, mode, val) 
-            for val, mode in zip(p_data, p_modes[:self.n_args])
-            ]
-            if p_modes[-1].value == 0:
-                args.pop()
-                args.append(p_data[-1])
-                return args #appended last data point to save at said location
-            elif p_modes[-1].value == 1:
-                args.pop()
-                args.append(memory.pc - 1) #as 1 is immediate appends position of argument
-                return args
-
-
-            
-
-    # def parse_arg(self, memory, param, value):
-    #     if param == ParameterMode.POSITION:
-    #         return memory.get_value(value)
-    #     elif param == ParameterMode.IMMEDIATE:
-    #         return value
-    #     elif param == ParameterMode.RELATIVE:
-    #         raise RuntimeError("Unimplemented")
 
 
 class AddOp(Operation):
@@ -108,9 +105,9 @@ class InputOp(Operation):
         super(InputOp, self).__init__(1, opcode)
         
     def run_operation(self, memory):
-        save_at = self.get_args(memory, self.code)
+        save_at = self.get_args(memory, self.code)[0]
         # ans = int(input("Enter the intcode input: "))
-        ans = 1
+        ans = 5
         memory.set_mem(save_at, ans)
 
 
@@ -120,8 +117,59 @@ class OutputOp(Operation):
         super(OutputOp, self).__init__(1, opcode)
 
     def run_operation(self, memory):
-        ans = self.get_args(memory, self.code)
+        ans = self.get_args(memory, self.code)[0]
         print(ans)
+
+class JumpIfTrueOp(Operation):
+    def __init__(self, opcode):
+        self.code = 5
+        super(JumpIfTrueOp, self).__init__(2, opcode)
+
+    def run_operation(self, memory):
+        jump, new_pc = self.get_args(memory, self.code, False)
+        if jump != 0:
+            memory.set_pc(new_pc)
+        else:
+            memory.increment_pc(self.n_args+1)
+
+
+class JumpIfFalseOp(Operation):
+    def __init__(self, opcode):
+        self.code = 6
+        super(JumpIfFalseOp, self).__init__(2, opcode)
+
+    def run_operation(self, memory):
+        jump, new_pc = self.get_args(memory, self.code, False)
+        if jump == 0:
+            memory.set_pc(new_pc)
+        else:
+            memory.increment_pc(self.n_args+1)
+
+
+class LessThanOp(Operation):
+    def __init__(self, opcode):
+        self.code = 7
+        super(LessThanOp, self).__init__(3, opcode)
+
+    def run_operation(self, memory):
+        p1, p2, save_at = self.get_args(memory, self.code)
+        if p1 < p2:
+            memory.set_mem(save_at, 1)
+        else:
+            memory.set_mem(save_at, 0)
+
+
+class EqualsOp(Operation):
+    def __init__(self, opcode):
+        self.code = 9
+        super(EqualsOp, self).__init__(3, opcode)
+
+    def run_operation(self, memory):
+        p1, p2, save_at = self.get_args(memory, self.code)
+        if p1 == p2:
+            value = memory.set_mem(save_at, 1)
+        else:
+            value = memory.set_mem(save_at, 0)
 
 
 class Memory:
@@ -135,10 +183,11 @@ class Memory:
         else:
             raise RuntimeError(f"Memory location {self.pc} out of bounds")
     
-    def get_count_after_pc(self, n_args):
+    def get_count_after_pc(self, n_args, increment_pc=True):
         arg_start_id = self.pc + 1
         args = self.memory[arg_start_id : arg_start_id + n_args]
-        self.pc += n_args + 1
+        if increment_pc:
+            self.increment_pc(n_args + 1)
         return args
 
     def set_mem(self, location, value):
@@ -153,10 +202,24 @@ class Memory:
         except:
             raise RuntimeError(f"Memory location {location} out of bounds")
 
+    def increment_pc(self, value):
+        try:
+            self.pc += value
+        except:
+            raise RuntimeError(f"Memory location {location} out of bounds")
+
+    def set_pc(self, new_pc):
+        try:
+            self.pc = new_pc
+        except:
+            raise RuntimeError(f"Memory location {location} out of bounds")
+
+
 class ParameterMode(Enum):
     POSITION = 0
     IMMEDIATE = 1
     RELATIVE = 2
+
 
 class OpCode:
     def __init__(self, opcode_int): # 01101
@@ -186,8 +249,8 @@ def d2p2():
             if ans == 19690720:
                 return (100*i + j)
 
-def d5p1():
-    with open('pair_programming/inputday5.txt', 'r') as in_file:
+def d5():
+    with open('pair_programming/testput.txt', 'r') as in_file:
         program = in_file.read()
     mem = Memory(program)
     output = compute(mem)
@@ -195,4 +258,4 @@ def d5p1():
 
 if __name__ == "__main__":
     # print(d2p2())
-    d5p1()
+    d5()
