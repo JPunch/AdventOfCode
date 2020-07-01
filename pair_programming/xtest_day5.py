@@ -65,6 +65,62 @@ def test_outputop(capsys):
 @pytest.mark.parametrize(
     "intput, expected",
     [
+        ("5,3,3,4,3,99", "4\n"),
+        ("5,2,0,4,0,99", "5\n"),
+        ("1105,1,104,3,99","3\n")
+    ]
+)
+def test_jumpiftrueop(intput, expected, capsys):
+    intput = intcode.Memory(intput)
+    output = intcode.compute(intput)
+    captured = capsys.readouterr()
+    assert captured.out == expected
+
+@pytest.mark.parametrize(
+    "intput, expected",
+    [
+        ("6,3,0,4,3,99", "4\n"),
+        ("6,0,3,104,0,99", "0\n"),
+        ("1106,0,104,3,99","3\n")
+    ]
+)
+def test_jumpiffalseop(intput, expected, capsys):
+    intput = intcode.Memory(intput)
+    output = intcode.compute(intput)
+    captured = capsys.readouterr()
+    assert captured.out == expected
+    
+@pytest.mark.parametrize(
+    "intput, expected",
+    [
+        ("7,3,0,3,99", [7,3,0,1,99]),
+        ("7,3,0,8,99,0,0,0,1", [7,3,0,8,99,0,0,0,0]),
+        ("1107,3,0,1,99", [1107,0,0,1,99]),
+        ("11107,3,0,3,99", [11107,3,0,0,99])
+    ]
+)
+def test_lessthanop(intput, expected):
+    intput = intcode.Memory(intput)
+    output = intcode.compute(intput)
+    assert output == expected
+    
+@pytest.mark.parametrize(
+    "intput, expected",
+    [
+        ("8,3,0,3,99", [8,3,0,0,99]),
+        ("8,3,0,8,99,0,0,0,0", [8,3,0,8,99,0,0,0,1]),
+        ("1108,3,0,1,99", [1108,0,0,1,99]),
+        ("11108,3,3,3,99", [11108,3,3,1,99])
+    ]
+)
+def test_equalsop(intput, expected):
+    intput = intcode.Memory(intput)
+    output = intcode.compute(intput)
+    assert output == expected
+
+@pytest.mark.parametrize(
+    "intput, expected",
+    [
         ("1,1,1,4,99,5,6,0,99", [30,1,1,4,2,5,6,0,99]),
         ("1101,100,-1,4,0", [1101, 100, -1, 4, 99]),
         ("11101,100,-1,4,99", [11101, 100, -1, 99, 99])

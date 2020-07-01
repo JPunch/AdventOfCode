@@ -6,14 +6,11 @@ def compute(mem):
         opcode = OpCode(opcode)
         # Create opcode handling object
         operation = opcode_factory(opcode)
-
         if operation is None:
             break
-
         # Mutate memory
         operation.run_operation(mem)
         # end step
-
     return mem.memory
 
 def parse_string(mem_string):
@@ -51,7 +48,7 @@ class Operation:
         p_data = memory.get_count_after_pc(self.n_args, increment_pc)
         p_modes  = [self.opcode.p1, self.opcode.p2, self.opcode.p3]
 
-        print(self.opcode.opcode, p_data)
+        # print(self.opcode.opcode, p_data)
 
         args = [
             self.parse_value_arg(memory, mode, val) 
@@ -60,12 +57,17 @@ class Operation:
         # Assume location to write to is always refering to a position
         if self.opcode.opcode == 4:
             args.append(self.parse_value_arg(memory, self.opcode.p1, p_data[-1]))
+        elif self.opcode.opcode == 5 or self.opcode.opcode == 6:
+            args.append(self.parse_value_arg(memory, self.opcode.p2, p_data[-1]))
         else:
-            args.append(self.parse_write_arg(memory, p_data[-1]))
+            args.append(self.parse_write_arg(memory, self.opcode.p3,  p_data[-1]))# needs to return location
         return args
 
-    def parse_write_arg(self, memory, value):
-        return value
+    def parse_write_arg(self, memory, param, value):
+        if param == ParameterMode.IMMEDIATE:
+            return memory.pc - 1
+        else:
+            return value
 
     def parse_value_arg(self, memory, param, value):
         if param == ParameterMode.POSITION:
@@ -83,7 +85,6 @@ class AddOp(Operation):
         
     def run_operation(self, memory):
         val1, val2, save_at = self.get_args(memory, self.code)
-        # print(val1, val2, save_at)
         ans = val1+val2
         memory.set_mem(save_at, ans)
 
@@ -106,8 +107,8 @@ class InputOp(Operation):
         
     def run_operation(self, memory):
         save_at = self.get_args(memory, self.code)[0]
-        # ans = int(input("Enter the intcode input: "))
-        ans = 5
+        ans = int(input("Enter the intcode input: "))
+        # ans = 5
         memory.set_mem(save_at, ans)
 
 
@@ -161,7 +162,7 @@ class LessThanOp(Operation):
 
 class EqualsOp(Operation):
     def __init__(self, opcode):
-        self.code = 9
+        self.code = 8
         super(EqualsOp, self).__init__(3, opcode)
 
     def run_operation(self, memory):
@@ -250,7 +251,7 @@ def d2p2():
                 return (100*i + j)
 
 def d5():
-    with open('pair_programming/testput.txt', 'r') as in_file:
+    with open('pair_programming/inputday5.txt', 'r') as in_file:
         program = in_file.read()
     mem = Memory(program)
     output = compute(mem)
