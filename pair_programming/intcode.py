@@ -257,6 +257,11 @@ def d5():
     output = compute(mem)
     return output
 
+def d7():
+    with open('pair_programming/inputday5.txt', 'r') as in_file:
+        program = in_file.read()
+    return None
+
 if __name__ == "__main__":
     # print(d2p2())
     d5()

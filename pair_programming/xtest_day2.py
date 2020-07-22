@@ -1,7 +1,7 @@
 '''Advent of code 2019 day2 collaboration with https://github.com/LiamLombard'''
 import pytest
 
-import intcode
+import pair_programming.intcode
 
 @pytest.mark.parametrize(
     "start_mem,end_mem",

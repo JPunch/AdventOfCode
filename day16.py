@@ -68,7 +68,7 @@ def d16p1():
         sig = f.read()
     # print(len(sig))
     # signal = Signal(sig)
-    signal = Signal("1231245595"*2)
+    signal = Signal(sig)
     pattern = Pattern("0,1,0,-1")
     desired_phase = 1
     count = 0
@@ -82,18 +82,20 @@ def d16p2():
     with open("inputday16.txt", "r") as f:
         sig = f.read()
     # signal = Signal(sig*2)
-    signal = Signal(sig*4)
+    signal = Signal(sig)
     heck = len(signal.signal)
     pattern = Pattern("0,1,0,-1")
     amount_to_add = sets_to_answer()
-    desired_phase = 100
+    desired_phase = 1
     count = 0
     while count < desired_phase:
         new_signal = apply_pattern(signal, pattern)
         signal = Signal(new_signal)
         count += 1
         print(count)
-    print(new_signal[-1950:-1300], new_signal[-1300:-650], new_signal[-650:])
+    a = new_signal[-1950:-1300], new_signal[-1300:-650], new_signal[-650:]
+    with open("test.txt", "a") as f:
+        f.write(str(a) + "\n")
     # mid_ans = []
     # for num in chunk[487:495]:
     #     mid_ans.append(last_digit(int(num) + 5))
@@ -107,4 +109,4 @@ def d16p2():
 if __name__ == "__main__":
     # print(d16p1())
     # print(sets_to_answer())
-    print(d16p2())
+    # print(d16p2())
