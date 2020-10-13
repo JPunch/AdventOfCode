@@ -1,24 +1,19 @@
 import re
 
 
-class element:
-    def __init__(self, ele):
-        self.amount = int(ele.split()[0])
-        self.name = ele.split()[1]
-
-
 def fuel_parse(fuel_ls):
     '''
     Returns a dictionary with key of right hand side of the equation made into the element class
     and a key value of all the entries on the left hand side made into the element class
     '''
     fuel_dict = {}
-    for line in fuel_ls:
+    lines = re.sub(",", "", fuel_ls)
+    lines = lines.split("\n")
+    for line in lines:
         left, right = line.split("=>")
-        right = element(right)
-        left = left.split(",")
-        left = [element(item) for item in left]
-        fuel_dict[right] = left
+        reactants = left.split()
+        value, product = right.split()
+        fuel_dict[product] = {"value": value, "reactants": reactants}
     return fuel_dict
 
 def calc_fuel(fuel_ls):
@@ -27,22 +22,27 @@ def calc_fuel(fuel_ls):
     next_elements = []
     current_dict = ["FUEL"]
     while run == True:
-        for item in fuel_ls.keys:
-            if len(current_dict) == current_dict.count("ORE"):
-                run = False
-            elif item.name in current_dict:
-                next_elements.append(item[item.name])
-        for item in next_elements:
-            pass
+        count = 1
+        for item in fuel_ls.keys():
+            for element in current_dict:
+                if(element in item and element not in "FUEL"):
+                    next_elements.extend(fuel_ls[item])
+        print(next_elements)
+        print("\n")
+        current_dict = next_elements
+        next_elements.clear()
+        count ++ 1
+        if(len(next_elements) == 0):
+            run = False    
             
         
 
 
 if __name__ == "__main__":
     with open("inputday14.txt", "r") as f:
-        lines = f.readlines()
+        lines = f.read()
     # print(lines)
     
     fuel_ls = fuel_parse(lines)
     # ore_count = calc_fuel(fuel_ls)
-    print(fuel_ls)
+    calc_fuel(fuel_ls)
