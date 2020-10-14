@@ -10,10 +10,9 @@ def fuel_parse(fuel_ls):
     lines = re.sub(",", "", fuel_ls)
     lines = lines.split("\n")
     for line in lines:
-        matches = re.match("(\d+\s\w+)", line)
-        print(matches)
+        matches = re.findall("(\d+\s\w+)", line)
         left, right = line.split("=>")
-        reactants = left.split()
+        reactants = re.findall("(\d+\s\w+)", left)
         value, product = right.split()
         fuel_dict[product] = {"value": value, "reactants": reactants}
     return fuel_dict
@@ -27,8 +26,8 @@ def calc_fuel(fuel_ls):
         count = 1
         for item in fuel_ls.keys():
             for element in current_dict:
-                if(element in item and element not in "FUEL"):
-                    next_elements.extend(fuel_ls[item])
+                if(element in fuel_ls[item]["reactants"] and element not in "1 FUEL"):
+                    next_elements.extend(fuel_ls[item]["reactants"])
         print(next_elements)
         print("\n")
         current_dict = next_elements
