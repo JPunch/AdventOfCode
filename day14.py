@@ -10,6 +10,8 @@ def fuel_parse(fuel_ls):
     lines = re.sub(",", "", fuel_ls)
     lines = lines.split("\n")
     for line in lines:
+        matches = re.match("(\d+\s\w+)", line)
+        print(matches)
         left, right = line.split("=>")
         reactants = left.split()
         value, product = right.split()
@@ -37,7 +39,7 @@ def calc_fuel(fuel_ls):
             
         
 
-
+#nect step is to regex match each number + reactant name combo to be used when creating a list to search for the next set of items
 if __name__ == "__main__":
     with open("inputday14.txt", "r") as f:
         lines = f.read()
