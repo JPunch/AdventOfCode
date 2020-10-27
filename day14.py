@@ -1,4 +1,5 @@
 import re
+import math
 from collections import defaultdict
 
 
@@ -8,13 +9,13 @@ class Equation:
         self.reactants, self.reactant_dict = self.parse_reactants(left)
 
     def parse_product(self, right):
-        match = re.findall("\d+\s\w+", right)
+        match = re.findall(r"\d+\s\w+", right)
         value, id = match[0].split()
         return int(value), id
 
     def parse_reactants(self, left):
         reactants, reactant_dict = [], {}
-        matches = re.findall("\d+\s\w+", left)
+        matches = re.findall(r"\d+\s\w+", left)
         for match in matches:
             value, name = match.split()
             reactants.append(name)
@@ -40,19 +41,49 @@ class Storage:
 
     def add_equation(self, equation):
         self.equations.append(equation)
+        for reactant in equation.reactants:
+            self.update_stored(reactant, 0)
 
-    def update_temp(self, id, value):
-        if id in self.reactant_stored:
+    def update_stored(self, id, value):
+        try:
             self.reactant_stored[id] += value
-        else:
+        except:
             self.reactant_stored[id] = value
 
-    def update_all(self, equation):
+    def update_needed(self, id, value):
+        try:
+            self.reactant_needed[id] += value
+        except:
+            self.reactant_needed[id] = value
+
+    def check_stored(self, equation):
         amount_needed = self.reactant_needed[equation.product]
-        amount_stored = storage.reactant_stored[equation.product]
+        amount_stored = self.reactant_stored[equation.product]
+        difference = amount_stored - amount_needed
+
+        if difference > 0:
+            self.reactant_needed[id] = 0
+            self.reactant_stored[id] = difference
+            self.update_all(equation, 1)
+        else:
+            self.reactant_needed[id] = 0
+            made_per_reaction = equation.product_value
+            scaler = math.ceil(abs(difference) / made_per_reaction)
+            amount_stored = difference + (scaler * made_per_reaction)
+            self.reactant_stored[id] = amount_stored
+            self.update_all(equation, scaler)
+
+            # get times equation needs to be applied and then update
+
+    def update_all(self, equation, scaler):
         reactant_dict = equation.reactant_dict
         for reactant in reactant_dict:
-            self.update_temp(reactant, reactant_dict[reactant])
+            self.update_needed(reactant, scaler * reactant_dict[reactant])
+
+    def fuel_equation(self, equation):
+        reactant_dict = equation.reactant_dict
+        for reactant in reactant_dict:
+            self.update_needed(reactant, reactant_dict[reactant])
 
 
 def fuel_parse(fuel_ls, storage):
@@ -71,12 +102,12 @@ def solver(storage):
     for equation in storage.equations:
         if equation.product == "FUEL":
             storage.active_reactants.extend(equation.reactants)
-            storage.update_all(equation)
+            storage.fuel_equation(equation)
     while run == True:
         # find the equation round up and scale amount
         for equation in storage.equations:
             if equation.product in storage.active_reactants:
-                storage.update_all(equation)
+                storage.check_stored(equation)
 
                 storage.active_reactants.remove(equation.product)
                 storage.active_reactants.extend(equation.reactants)
@@ -88,17 +119,12 @@ def solver(storage):
     return print(count)
 
 
-# I need a check to see if a dictionary entry already exists and then if it exists reevaluate the amount of the next product for the new amount and then update and those new ones are checked also
 # ANSWER FOR THE EXAMPLE IS 31 ORE
 
 
-# nect step is to regex match each number + reactant name combo to be used when creating a list to search for the next set of items
 if __name__ == "__main__":
     with open("inputday14ex.txt", "r") as f:
         lines = f.read()
-    # print(lines)
     storage = Storage()
     fuel_ls = fuel_parse(lines, storage)
     solver(fuel_ls)
-    # ore_count = calc_fuel(fuel_ls)
-    # calc_fuel(fuel_ls)
