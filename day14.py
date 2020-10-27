@@ -62,18 +62,15 @@ class Storage:
         difference = amount_stored - amount_needed
 
         if difference > 0:
-            self.reactant_needed[id] = 0
-            self.reactant_stored[id] = difference
-            self.update_all(equation, 1)
+            self.reactant_needed[equation.product] = 0
+            self.reactant_stored[equation.product] = difference
         else:
-            self.reactant_needed[id] = 0
+            self.reactant_needed[equation.product] = 0
             made_per_reaction = equation.product_value
             scaler = math.ceil(abs(difference) / made_per_reaction)
             amount_stored = difference + (scaler * made_per_reaction)
-            self.reactant_stored[id] = amount_stored
+            self.reactant_stored[equation.product] = amount_stored
             self.update_all(equation, scaler)
-
-            # get times equation needs to be applied and then update
 
     def update_all(self, equation, scaler):
         reactant_dict = equation.reactant_dict
@@ -98,7 +95,6 @@ def fuel_parse(fuel_ls, storage):
 
 def solver(storage):
     run = True
-    count = 0
     for equation in storage.equations:
         if equation.product == "FUEL":
             storage.active_reactants.extend(equation.reactants)
@@ -116,15 +112,15 @@ def solver(storage):
             # print("Finished")
             run = False
 
-    return print(count)
+    return storage.reactant_needed["ORE"]
 
 
 # ANSWER FOR THE EXAMPLE IS 31 ORE
 
 
 if __name__ == "__main__":
-    with open("inputday14ex.txt", "r") as f:
+    with open("inputday14.txt", "r") as f:
         lines = f.read()
     storage = Storage()
     fuel_ls = fuel_parse(lines, storage)
-    solver(fuel_ls)
+    print(solver(fuel_ls))
