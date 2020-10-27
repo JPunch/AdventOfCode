@@ -3,6 +3,16 @@ import math
 from collections import defaultdict
 
 
+def fuel_parse(fuel_ls, storage):
+    lines = re.sub(",", "", fuel_ls)
+    lines = lines.split("\n")
+    for line in lines:
+        left, right = line.split("=>")
+        storage.add_equation(Equation(left, right))
+
+    return storage
+
+
 class Equation:
     def __init__(self, left, right):
         self.product_value, self.product = self.parse_product(right)
@@ -81,16 +91,6 @@ class Storage:
         reactant_dict = equation.reactant_dict
         for reactant in reactant_dict:
             self.update_needed(reactant, reactant_dict[reactant])
-
-
-def fuel_parse(fuel_ls, storage):
-    lines = re.sub(",", "", fuel_ls)
-    lines = lines.split("\n")
-    for line in lines:
-        left, right = line.split("=>")
-        storage.add_equation(Equation(left, right))
-
-    return storage
 
 
 def solver(storage):
