@@ -115,6 +115,39 @@ def solver(storage):
     return storage.reactant_needed["ORE"]
 
 
+def solverp2(storage):
+    count = 0
+    run = True
+    for equation in storage.equations:
+        if equation.product == "FUEL":
+            final_reaction = equation
+            storage.active_reactants.extend(equation.reactants)
+            storage.fuel_equation(equation)
+    while run == True:
+        # find the equation round up and scale amount
+        for equation in storage.equations:
+            if equation.product in storage.active_reactants:
+                storage.check_stored(equation)
+
+                storage.active_reactants.remove(equation.product)
+                storage.active_reactants.extend(equation.reactants)
+
+        if storage.reactant_needed["ORE"] > 1000000000:
+            run = False
+
+        elif len(storage.active_reactants) == storage.active_reactants.count("ORE"):
+            count += 1
+            values = list(storage.reactant_stored.values())
+            if len(values) == values.count(0):
+                print(count)
+            print(f"ORE count: {storage.reactant_needed['ORE']}, FUEL count: {count}")
+            storage.active_reactants.clear()
+            storage.active_reactants.extend(equation.reactants)
+            storage.fuel_equation(equation)
+
+    return count
+
+
 # ANSWER FOR THE EXAMPLE IS 31 ORE
 
 
@@ -123,4 +156,6 @@ if __name__ == "__main__":
         lines = f.read()
     storage = Storage()
     fuel_ls = fuel_parse(lines, storage)
-    print(solver(fuel_ls))
+    # print(solver(fuel_ls))
+    print(solverp2(fuel_ls))
+    # 3919672 too high

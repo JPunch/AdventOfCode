@@ -1,7 +1,8 @@
-'''Advent of code 2019 day12 tests'''
+"""Advent of code 2019 day12 tests"""
 
 import unittest
-from day14 import fuel_parse, calc_fuel
+from day14 import fuel_parse, solver, Storage
+
 
 class FuelAmount(unittest.TestCase):
     def testex1(self):
@@ -14,8 +15,9 @@ class FuelAmount(unittest.TestCase):
 7 DCFZ, 7 PSHF => 2 XJWVT
 165 ORE => 2 GPVTF
 3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT"""
-        example1 = fuel_parse(example1)
-        fuel_amount = calc_fuel(example1)
+        storage = Storage()
+        fuel_ls = fuel_parse(example1, storage)
+        fuel_amount = solver(fuel_ls)
         return self.assertEqual(fuel_amount, 13312)
 
 
