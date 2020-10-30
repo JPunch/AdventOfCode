@@ -39,7 +39,7 @@ class Equation:
             self.reactant_dict[id] = int(value)
 
     def __str__(self):
-        return f"Product {self.product_value} {self.product} => {self.reactant_dict.keys(), self.reactant_dict.values()}"
+        return f"Product {self.product_value} {self.product} => {self.reactant_dict.keys()}, {self.reactant_dict.values()}"
 
 
 class Storage:
@@ -121,29 +121,36 @@ def solverp2(storage):
     for equation in storage.equations:
         if equation.product == "FUEL":
             final_reaction = equation
-            storage.active_reactants.extend(equation.reactants)
-            storage.fuel_equation(equation)
+            storage.active_reactants.extend(final_reaction.reactants)
+            storage.fuel_equation(final_reaction)
     while run == True:
         # find the equation round up and scale amount
         for equation in storage.equations:
-            if equation.product in storage.active_reactants:
+            if count == 1:
+                scale_up = math.floor(999999000000 / storage.reactant_needed["ORE"])
+                storage.reactant_needed["ORE"] = (
+                    storage.reactant_needed["ORE"] * scale_up
+                )
+                for product in storage.reactant_stored:
+                    storage.reactant_stored[product] = (
+                        storage.reactant_stored[product] * scale_up
+                    )
+                count = scale_up
+            elif equation.product in storage.active_reactants:
                 storage.check_stored(equation)
 
                 storage.active_reactants.remove(equation.product)
                 storage.active_reactants.extend(equation.reactants)
 
-        if storage.reactant_needed["ORE"] > 1000000000:
+        if storage.reactant_needed["ORE"] > 1000000000000:
             run = False
 
         elif len(storage.active_reactants) == storage.active_reactants.count("ORE"):
             count += 1
-            values = list(storage.reactant_stored.values())
-            if len(values) == values.count(0):
-                print(count)
             print(f"ORE count: {storage.reactant_needed['ORE']}, FUEL count: {count}")
             storage.active_reactants.clear()
-            storage.active_reactants.extend(equation.reactants)
-            storage.fuel_equation(equation)
+            storage.active_reactants.extend(final_reaction.reactants)
+            storage.fuel_equation(final_reaction)
 
     return count
 
